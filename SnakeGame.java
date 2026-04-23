@@ -31,6 +31,7 @@ class GamePanel extends JPanel {
     private int nextDy = 0;
     private Timer gameTimer;
     private int score = 0;
+    private int highScore = 0;
     private boolean gameOver = false;
     private Random random = new Random();
     private int tickSpeed = 150;
@@ -64,6 +65,9 @@ class GamePanel extends JPanel {
         normalFoodEaten = 0;
         specialFood = null;
         speedUpCount = 0;
+        if (gameTimer != null) {
+            gameTimer.setDelay(tickSpeed);
+        }
     }
     
     private void spawnFood() {
@@ -211,6 +215,9 @@ class GamePanel extends JPanel {
     
     private void endGame() {
         gameOver = true;
+        if (score > highScore) {
+            highScore = score;
+        }
         repaint();
     }
     
@@ -260,6 +267,7 @@ class GamePanel extends JPanel {
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 16));
         g2d.drawString("Score: " + score, 10, 20);
+        g2d.drawString("High Score: " + highScore, 10, 40);
         
         // Draw game over message
         if (gameOver) {
@@ -282,6 +290,13 @@ class GamePanel extends JPanel {
             g2d.drawString(scoreText, textX, textY);
             
             g2d.setFont(new Font("Arial", Font.BOLD, 16));
+            String highScoreText = "High Score: " + highScore;
+            fm = g2d.getFontMetrics();
+            textX = (getWidth() - fm.stringWidth(highScoreText)) / 2;
+            textY += 40;
+            g2d.drawString(highScoreText, textX, textY);
+            
+            g2d.setFont(new Font("Arial", Font.BOLD, 16));
             String resetText = "Press R to Play Again";
             fm = g2d.getFontMetrics();
             textX = (getWidth() - fm.stringWidth(resetText)) / 2;
@@ -296,6 +311,7 @@ class GamePanel extends JPanel {
             if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
                 initializeSnake();
                 spawnFood();
+                gameTimer.setDelay(tickSpeed);
                 gameTimer.restart();
                 repaint();
                 requestFocusInWindow();

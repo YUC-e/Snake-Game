@@ -26,3 +26,13 @@ Prompt:
 In SnakeGame.java, Make the snake have a more gradient pattern where the head of the snake is a darker green and gradually becomes more light towards the tail of the snake.
 
 Prompt:
+The speed-up mechanic is staying after the game is reset. Make sure that the speed of the snake gets reset when the game is reset.
+
+// This code caused a NullPointerException //
+
+This new code is setting off a NullPointerException because this.gameTimer is null.
+
+// This follow-up prompt fixed the NullPointerException //
+
+PROMPT:
+In SnakeGame.java, Add a high score feature that saves the highest score achieved while the program is running. Do not change any logic of the game.
