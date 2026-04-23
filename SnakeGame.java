@@ -32,6 +32,8 @@ class GamePanel extends JPanel {
     private int score = 0;
     private boolean gameOver = false;
     private Random random = new Random();
+    private int tickSpeed = 150;
+    private final int MIN_TICK_SPEED = 80;
     
     public GamePanel() {
         setBackground(new Color(50, 50, 50));
@@ -53,26 +55,48 @@ class GamePanel extends JPanel {
         nextDy = 0;
         score = 0;
         gameOver = false;
+        tickSpeed = 150;
     }
     
-    private void spawnFood() {
-        Point newFood;
-        boolean validSpot;
-        do {
-            validSpot = true;
+     private void spawnFood() {
+        boolean foundSpot = false;
+        Point newFood = null;
+        
+        // Create a list of all occupied positions
+        List<Point> occupiedPositions = new ArrayList<>(snake);
+        
+        // Try random placement with guaranteed attempts
+        for (int attempt = 0; attempt < 200; attempt++) {
             newFood = new Point(random.nextInt(gridSize), random.nextInt(gridSize));
-            for (Point segment : snake) {
-                if (segment.equals(newFood)) {
-                    validSpot = false;
-                    break;
+            if (!occupiedPositions.contains(newFood)) {
+                food = newFood;
+                foundSpot = true;
+                return;
+            }
+        }
+        
+        // If random fails, do systematic scan (guaranteed to find a spot if one exists)
+        if (!foundSpot) {
+            for (int x = 0; x < gridSize; x++) {
+                for (int y = 0; y < gridSize; y++) {
+                    Point candidate = new Point(x, y);
+                    if (!occupiedPositions.contains(candidate)) {
+                        food = candidate;
+                        foundSpot = true;
+                        return;
+                    }
                 }
             }
-        } while (!validSpot);
-        food = newFood;
+        }
+        
+        // This should never happen unless snake fills entire grid
+        if (!foundSpot) {
+            food = new Point(0, 0);
+        }
     }
     
     private void startGameTimer() {
-        gameTimer = new Timer(150, e -> {
+        gameTimer = new Timer(tickSpeed, e -> {
             if (!gameOver) {
                 moveSnake();
             }
@@ -122,6 +146,13 @@ class GamePanel extends JPanel {
         }
         
         repaint();
+    }
+    
+    private void speedUp() {
+        if (tickSpeed > MIN_TICK_SPEED) {
+            tickSpeed -= 10;
+            gameTimer.setDelay(tickSpeed);
+        }
     }
     
     private void endGame() {
@@ -190,6 +221,7 @@ class GamePanel extends JPanel {
             if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
                 initializeSnake();
                 spawnFood();
+                gameTimer.restart();
                 repaint();
                 requestFocusInWindow();
                 return;
