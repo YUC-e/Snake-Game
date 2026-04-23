@@ -24,6 +24,7 @@ class GamePanel extends JPanel {
     private final int gridSize = 20;
     private List<Point> snake = new ArrayList<>();
     private Point food;
+    private Point specialFood;
     private int dx = 1;
     private int dy = 0;
     private int nextDx = 1;
@@ -34,6 +35,8 @@ class GamePanel extends JPanel {
     private Random random = new Random();
     private int tickSpeed = 150;
     private final int MIN_TICK_SPEED = 80;
+    private int normalFoodEaten = 0;
+    private final int SPECIAL_FOOD_THRESHOLD = 3;
     
     public GamePanel() {
         setBackground(new Color(50, 50, 50));
@@ -56,9 +59,11 @@ class GamePanel extends JPanel {
         score = 0;
         gameOver = false;
         tickSpeed = 150;
+        normalFoodEaten = 0;
+        specialFood = null;
     }
     
-     private void spawnFood() {
+    private void spawnFood() {
         boolean foundSpot = false;
         Point newFood = null;
         
@@ -75,23 +80,51 @@ class GamePanel extends JPanel {
             }
         }
         
-        // If random fails, do systematic scan (guaranteed to find a spot if one exists)
+        // If random fails, do systematic scan
         if (!foundSpot) {
             for (int x = 0; x < gridSize; x++) {
                 for (int y = 0; y < gridSize; y++) {
                     Point candidate = new Point(x, y);
                     if (!occupiedPositions.contains(candidate)) {
                         food = candidate;
-                        foundSpot = true;
                         return;
                     }
                 }
             }
         }
+    }
+    
+    private void spawnSpecialFood() {
+        boolean foundSpot = false;
+        Point newSpecialFood = null;
         
-        // This should never happen unless snake fills entire grid
+        // Create a list of all occupied positions
+        List<Point> occupiedPositions = new ArrayList<>(snake);
+        if (food != null) {
+            occupiedPositions.add(food);
+        }
+        
+        // Try random placement with guaranteed attempts
+        for (int attempt = 0; attempt < 200; attempt++) {
+            newSpecialFood = new Point(random.nextInt(gridSize), random.nextInt(gridSize));
+            if (!occupiedPositions.contains(newSpecialFood)) {
+                specialFood = newSpecialFood;
+                foundSpot = true;
+                return;
+            }
+        }
+        
+        // If random fails, do systematic scan
         if (!foundSpot) {
-            food = new Point(0, 0);
+            for (int x = 0; x < gridSize; x++) {
+                for (int y = 0; y < gridSize; y++) {
+                    Point candidate = new Point(x, y);
+                    if (!occupiedPositions.contains(candidate)) {
+                        specialFood = candidate;
+                        return;
+                    }
+                }
+            }
         }
     }
     
@@ -136,11 +169,26 @@ class GamePanel extends JPanel {
         // Add new head
         snake.add(0, newHead);
         
-        // Check if food was eaten
-        if (food != null && newHead.equals(food)) {
+        // Check if special food was eaten
+        if (specialFood != null && newHead.equals(specialFood)) {
+            score += 30;
+            // Add 2 extra segments by not removing tail twice
+            specialFood = null;
+            normalFoodEaten = 0;
+        } 
+        // Check if normal food was eaten
+        else if (food != null && newHead.equals(food)) {
             score += 10;
+            normalFoodEaten++;
             spawnFood();
-        } else {
+            
+            // Check if special food should spawn
+            if (normalFoodEaten >= SPECIAL_FOOD_THRESHOLD) {
+                spawnSpecialFood();
+                normalFoodEaten = 0;
+            }
+        } 
+        else {
             // Remove tail if no food eaten
             snake.remove(snake.size() - 1);
         }
@@ -171,10 +219,16 @@ class GamePanel extends JPanel {
             g.drawLine(0, i * cellSize, gridSize * cellSize, i * cellSize);
         }
         
-        // Draw food
+        // Draw normal food
         if (food != null) {
             g.setColor(Color.RED);
             g.fillRect(food.x * cellSize, food.y * cellSize, cellSize, cellSize);
+        }
+        
+        // Draw special food
+        if (specialFood != null) {
+            g.setColor(Color.YELLOW);
+            g.fillRect(specialFood.x * cellSize, specialFood.y * cellSize, cellSize, cellSize);
         }
         
         // Draw snake
@@ -203,12 +257,14 @@ class GamePanel extends JPanel {
             
             g.setFont(new Font("Arial", Font.BOLD, 24));
             String scoreText = "Final Score: " + score;
+            fm = g.getFontMetrics();
             textX = (getWidth() - fm.stringWidth(scoreText)) / 2;
             textY += 50;
             g.drawString(scoreText, textX, textY);
             
             g.setFont(new Font("Arial", Font.BOLD, 16));
             String resetText = "Press R to Play Again";
+            fm = g.getFontMetrics();
             textX = (getWidth() - fm.stringWidth(resetText)) / 2;
             textY += 40;
             g.drawString(resetText, textX, textY);
