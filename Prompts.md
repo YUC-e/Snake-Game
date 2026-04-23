@@ -17,3 +17,12 @@ Prompt:
 in SnakeGame.java, add a second food tile that increases the snake length by two tiles. Have it respawn after the snake eats three of the normal food tiles.
 
 Prompt:
+In SnakeGame.java, implement a speed-up mechanic that increases the snakes speed when it picks up more food. Set a limit of eight times that this can occur to keep the game from being too fast.
+
+Prompt:
+In SnakeGame.java give the snake more rounded edges but still keeping the square shape also apply this new tile shape to the food.
+
+Prompt:
+In SnakeGame.java, Make the snake have a more gradient pattern where the head of the snake is a darker green and gradually becomes more light towards the tail of the snake.
+
+Prompt:

@@ -9,7 +9,7 @@ public class SnakeGame {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Snake");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 600);
+        frame.setSize(610, 630);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         
@@ -217,63 +217,76 @@ class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
         // Draw grid
-        g.setColor(new Color(80, 80, 80));
+        g2d.setColor(new Color(80, 80, 80));
         for (int i = 0; i <= gridSize; i++) {
-            g.drawLine(i * cellSize, 0, i * cellSize, gridSize * cellSize);
-            g.drawLine(0, i * cellSize, gridSize * cellSize, i * cellSize);
+            g2d.drawLine(i * cellSize, 0, i * cellSize, gridSize * cellSize);
+            g2d.drawLine(0, i * cellSize, gridSize * cellSize, i * cellSize);
         }
         
         // Draw normal food
         if (food != null) {
-            g.setColor(Color.RED);
-            g.fillRect(food.x * cellSize, food.y * cellSize, cellSize, cellSize);
+            g2d.setColor(Color.RED);
+            int arcSize = 8;
+            g2d.fillRoundRect(food.x * cellSize + 2, food.y * cellSize + 2, cellSize - 4, cellSize - 4, arcSize, arcSize);
         }
         
         // Draw special food
         if (specialFood != null) {
-            g.setColor(Color.YELLOW);
-            g.fillRect(specialFood.x * cellSize, specialFood.y * cellSize, cellSize, cellSize);
+            g2d.setColor(Color.YELLOW);
+            int arcSize = 8;
+            g2d.fillRoundRect(specialFood.x * cellSize + 2, specialFood.y * cellSize + 2, cellSize - 4, cellSize - 4, arcSize, arcSize);
         }
         
-        // Draw snake
-        g.setColor(Color.GREEN);
-        for (Point segment : snake) {
-            g.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+        // Draw snake with gradient from dark to light green
+        int arcSize = 8;
+        int snakeLength = snake.size();
+        for (int i = 0; i < snakeLength; i++) {
+            // Calculate gradient: head (i=0) is dark, tail (i=snakeLength-1) is light
+            float ratio = (float) i / (snakeLength - 1);
+            int red = (int) (0 + (100 * ratio));
+            int green = (int) (100 + (155 * ratio));
+            int blue = (int) (0 + (0 * ratio));
+            
+            g2d.setColor(new Color(red, green, blue));
+            Point segment = snake.get(i);
+            g2d.fillRoundRect(segment.x * cellSize + 2, segment.y * cellSize + 2, cellSize - 4, cellSize - 4, arcSize, arcSize);
         }
         
         // Draw score
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 16));
-        g.drawString("Score: " + score, 10, 20);
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.drawString("Score: " + score, 10, 20);
         
         // Draw game over message
         if (gameOver) {
-            g.setColor(new Color(0, 0, 0, 200));
-            g.fillRect(0, 0, getWidth(), getHeight());
+            g2d.setColor(new Color(0, 0, 0, 200));
+            g2d.fillRect(0, 0, getWidth(), getHeight());
             
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 40));
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 40));
             String gameOverText = "Game Over";
-            FontMetrics fm = g.getFontMetrics();
+            FontMetrics fm = g2d.getFontMetrics();
             int textX = (getWidth() - fm.stringWidth(gameOverText)) / 2;
             int textY = (getHeight() / 2) - 30;
-            g.drawString(gameOverText, textX, textY);
+            g2d.drawString(gameOverText, textX, textY);
             
-            g.setFont(new Font("Arial", Font.BOLD, 24));
+            g2d.setFont(new Font("Arial", Font.BOLD, 24));
             String scoreText = "Final Score: " + score;
-            fm = g.getFontMetrics();
+            fm = g2d.getFontMetrics();
             textX = (getWidth() - fm.stringWidth(scoreText)) / 2;
             textY += 50;
-            g.drawString(scoreText, textX, textY);
+            g2d.drawString(scoreText, textX, textY);
             
-            g.setFont(new Font("Arial", Font.BOLD, 16));
+            g2d.setFont(new Font("Arial", Font.BOLD, 16));
             String resetText = "Press R to Play Again";
-            fm = g.getFontMetrics();
+            fm = g2d.getFontMetrics();
             textX = (getWidth() - fm.stringWidth(resetText)) / 2;
             textY += 40;
-            g.drawString(resetText, textX, textY);
+            g2d.drawString(resetText, textX, textY);
         }
     }
     
