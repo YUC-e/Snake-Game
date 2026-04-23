@@ -12,3 +12,8 @@ Make the snake move automatically using a Swing timer that ticks every 150 milli
 
 Prompt:
 Add a food pellet that spawns at a random empty cell. When the snake eats it, grow by one segment and spawn new food. Add collision detection: hitting a wall or the snake's own body should end the game, stop movement, and show a "Game Over" message with the final score. Display the current score in the top-left corner during play. When the game is over, let the player press R to reset everything and play again.
+
+Prompt:
+in SnakeGame.java, add a second food tile that increases the snake length by two tiles. Have it respawn after the snake eats three of the normal food tiles.
+
+Prompt:

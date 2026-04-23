@@ -37,6 +37,8 @@ class GamePanel extends JPanel {
     private final int MIN_TICK_SPEED = 80;
     private int normalFoodEaten = 0;
     private final int SPECIAL_FOOD_THRESHOLD = 3;
+    private int speedUpCount = 0;
+    private final int MAX_SPEED_UPS = 8;
     
     public GamePanel() {
         setBackground(new Color(50, 50, 50));
@@ -61,6 +63,7 @@ class GamePanel extends JPanel {
         tickSpeed = 150;
         normalFoodEaten = 0;
         specialFood = null;
+        speedUpCount = 0;
     }
     
     private void spawnFood() {
@@ -172,6 +175,7 @@ class GamePanel extends JPanel {
         // Check if special food was eaten
         if (specialFood != null && newHead.equals(specialFood)) {
             score += 30;
+            speedUp();
             // Add 2 extra segments by not removing tail twice
             specialFood = null;
             normalFoodEaten = 0;
@@ -180,6 +184,7 @@ class GamePanel extends JPanel {
         else if (food != null && newHead.equals(food)) {
             score += 10;
             normalFoodEaten++;
+            speedUp();
             spawnFood();
             
             // Check if special food should spawn
@@ -197,9 +202,10 @@ class GamePanel extends JPanel {
     }
     
     private void speedUp() {
-        if (tickSpeed > MIN_TICK_SPEED) {
+        if (speedUpCount < MAX_SPEED_UPS && tickSpeed > 80) {
             tickSpeed -= 10;
             gameTimer.setDelay(tickSpeed);
+            speedUpCount++;
         }
     }
     
